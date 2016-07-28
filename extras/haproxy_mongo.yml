@@ -1,0 +1,8 @@
+  - service:
+      haproxy_service_name: mongodb
+      haproxy_backend_nodes: "{{ groups['mongodb_data_shard'] | default([]) }}"
+      haproxy_port: 27017
+      haproxy_balance_type: tcp
+      haproxy_balance_alg: source
+      haproxy_backend_options:
+       - "tcp-check expect string 6f6b"

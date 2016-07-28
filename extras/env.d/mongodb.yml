@@ -1,0 +1,37 @@
+---
+component_skel:
+  mongodb_config_server:
+    belongs_to:
+    - mongodb_all
+  mongodb_repl_server:
+    belongs_to:
+    - mongodb_all
+  mongodb_data_shard:
+    belongs_to:
+    - mongodb_all
+
+container_skel:
+  mongodb_config_container:
+    belongs_to:
+      - infra_containers
+      - shared-infra_containers
+    contains:
+      - mongodb_config_server
+    properties:
+      service_name: mongodb
+  mongodb_repl_container:
+    belongs_to:
+      - infra_containers
+      - shared-infra_containers
+    contains:
+      - mongodb_repl_server
+    properties:
+      service_name: mongodb
+  mongodb_data_shard_container:
+    belongs_to:
+      - infra_containers
+      - shared-infra_containers
+    contains:
+      - mongodb_data_shard
+    properties:
+      service_name: mongodb
