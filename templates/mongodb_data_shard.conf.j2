@@ -1,0 +1,20 @@
+# {{ ansible_managed }}
+
+logpath=/var/log/mongodb/mongos.log
+logappend=true
+fork = true
+
+port={{ mongodb_port }}
+bind_ip={{ mongodb_bind_address }}
+
+{% set hosts = '' %}
+{% for host in groups[mongodb_services['mongodb-config-server']['group']] %}
+{% if loop.last %}
+{% set hosts = hosts + host + ':' ~ mongodb_port  %}
+configdb={{ mongoc_config_set_name }}/{{ hosts }}
+{% else %}
+{% set hosts = hosts + host + ':' ~ mongodb_port + ','  %}
+{% endif %}
+{% endfor %}
+
+chunkSize={{ mongos_chunk_size }}

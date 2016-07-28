@@ -1,0 +1,65 @@
+---
+
+- name: Check sharding status
+  shell: >
+    mongo --port {{ mongodb_port }} --quiet --eval 'sh.status()' \
+    | grep -qi {{ mongodb_repl_set_name }}
+  register: os_mongodb_data_shard_check_sharding
+  changed_when: false
+  ignore_errors: true
+
+- name: Create the file to initialize the mongo data shard set
+  template:
+    src: mongodb_data_shard_init.j2
+    dest: /tmp/enablesharding.js
+  tags: os-mongodb-data-shard-create-shard
+
+- name: Create the file to initialize the telemetry user
+  template:
+    src: mongodb_data_shard_create_telemetry_user.j2
+    dest: /tmp/create_telemetry_user.js
+  tags: os-mongodb-data-shard-create-telemetry-user
+
+- name: Create the file to initialize the alarm user
+  template:
+    src: mongodb_data_shard_create_alarm_user.j2
+    dest: /tmp/create_alarm_user.js
+  tags: os-mongodb-data-shard-create-alarm-user
+
+- name: ENABLE SHARDING
+  command: >
+     mongo --port "{{ mongodb_port }}" /tmp/enablesharding.js
+  tags: os-mongodb-data-shard-init
+  when: os_mongodb_data_shard_check_sharding.rc != 0
+
+- name: Check if telemetry user exists
+  shell: >
+     mongo --port {{ mongodb_port }} -u {{ ceilometer_database_user }} \
+     -p {{ ceilometer_container_db_password }} \
+     --quiet --eval 'db.version()' {{ ceilometer_database_name }}
+  register: os_mongodb_data_shard_check_telemetry_user
+  ignore_errors: true
+
+- name: Create telemetry user
+  shell: >
+     mongo --port "{{ mongodb_port }}" \
+     --eval 'db = db.getSiblingDB("{{ ceilometer_database_name }}")'  \
+     /tmp/create_telemetry_user.js
+  when: os_mongodb_data_shard_check_telemetry_user.rc != 0
+  tags: os-mongodb-data-shard-create-telemetry-user
+
+- name: Check if alarm user exists
+  shell: >
+     mongo --port {{ mongodb_port }} -u {{ aodh_database_user }} \
+     -p {{ aodh_container_db_password }} \
+     --quiet --eval 'db.version()' {{ aodh_database_name }}
+  register: os_mongodb_data_shard_check_alarm_user
+  ignore_errors: true
+
+- name: Create alarm user
+  shell: >
+     mongo --port "{{ mongodb_port }}" \
+     --eval 'db = db.getSiblingDB("{{ aodh_database_name }}")' \
+     /tmp/create_alarm_user.js
+  when: os_mongodb_data_shard_check_alarm_user.rc != 0
+  tags: os-mongodb-data-shard-create-telemetry-user

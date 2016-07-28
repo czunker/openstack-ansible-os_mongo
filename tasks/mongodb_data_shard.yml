@@ -1,0 +1,79 @@
+---
+
+- name: Create data directory for mongodb_data_shard configuration
+  file:
+    path: "{{ mongodb_datadir_prefix }}/shard"
+    state: directory
+    owner: "{{ mongodb_system_user_name }}"
+    group: "{{ mongodb_system_group_name }}"
+  tags: os-mongodb-data-shard-create-dir
+
+- name: Templatize /etc/hosts
+  template:
+    src: mongodb_hosts.j2
+    dest: /etc/hosts
+    mode: 0644
+  register: os_mongodb_data_shard_hosts
+
+- name: Templatize /etc/default/mongos
+  template:
+    src: mongos_default.j2
+    dest: /etc/default/mongos
+    mode: 0644
+  register: os_mongodb_data_shard_defaults
+
+- name: Remove /etc/init/mongod.conf
+  file:
+    path: /etc/init/mongod.conf
+    state: absent
+
+- name: Remove /etc/mongod.conf
+  file:
+    path: /etc/mongod.conf
+    state: absent
+
+- name: Remove /var/run/mongodb.pid
+  file:
+    path: /var/run/mongodb.pid
+    state: absent
+
+- name: Check if mongod is running
+  shell: ps auxwf | grep -v grep | grep -iq mongod.conf
+  ignore_errors: true
+  register: mongodb_data_shard_check_mongod
+
+- name: Kill mongod process
+  shell: ps auxwf | grep -v grep | grep -i mongod.conf | awk '{print $2}' | xargs kill -9
+  when: mongodb_data_shard_check_mongod.rc == 0
+  ignore_errors: true
+
+- name: Templatize upstart job /etc/init/mongos.conf
+  template:
+    src: mongodb_data_shard_upstart.j2
+    dest: /etc/init/mongos.conf
+    mode: 0655
+  register: os_mongodb_data_shard_upstart
+
+- name: Create the mongo configuration server file
+  template:
+    src: mongodb_data_shard.conf.j2
+    dest: /etc/mongos.conf
+  register: mongodb_data_shard_conf
+
+- name: pause
+  pause: seconds=20
+
+- name: Copy the keyfile for authentication
+  copy:
+    src: mongodb_data_shard_secret
+    dest: "{{ mongodb_datadir_prefix }}/secret"
+    owner: "{{ mongodb_system_user_name }}"
+    group: "{{ mongodb_system_group_name }}"
+    mode: 0400
+
+- name: Restart MongoDB services on file changes
+  command: /usr/sbin/service mongos restart
+  when: (
+    os_mongodb_data_shard_defaults.changed
+    or os_mongodb_data_shard_upstart.changed
+    or mongodb_data_shard_conf.changed )

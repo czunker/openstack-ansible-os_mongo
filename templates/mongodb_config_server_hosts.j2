@@ -1,0 +1,11 @@
+# {{ ansible_managed }}
+127.0.0.1   localhost
+{% for host in groups[mongodb_services['mongodb-config-server']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ hostvars[host]['ansible_nodename'] }}
+{% endfor %}
+{% for host in groups[mongodb_services['mongodb-repl-server']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ hostvars[host]['ansible_nodename'] }}
+{% endfor %}
+{% for host in groups[mongodb_services['mongodb-data-shard']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ hostvars[host]['ansible_nodename'] }}
+{% endfor %}

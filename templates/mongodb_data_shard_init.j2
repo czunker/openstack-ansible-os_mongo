@@ -1,0 +1,7 @@
+{% for host in groups[mongodb_services['mongodb-repl-server']['group']] %}
+sh.addShard("{{ mongodb_repl_set_name}}/{{ hostvars[host]['ansible_nodename'] }}:{{ mongodb_port }}")
+sleep(8000)
+{% endfor %}
+sh.enableSharding("{{ ceilometer_database_name }}")
+sh.enableSharding("{{ aodh_database_name}}")
+printjson(sh.status())

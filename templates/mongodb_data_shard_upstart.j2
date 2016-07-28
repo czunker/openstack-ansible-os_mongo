@@ -1,0 +1,15 @@
+# {{ ansible_managed }}
+
+# /etc/init/mongos.conf
+
+description "service file for mongos server"
+
+limit nofile 20000 20000
+kill timeout 300 # wait 300s between SIGTERM and SIGKILL
+
+expect daemon
+
+start on (local-filesystems and net-device-up IFACE=eth0)
+stop on runlevel [016]
+
+exec /usr/bin/mongos --config /etc/mongos.conf

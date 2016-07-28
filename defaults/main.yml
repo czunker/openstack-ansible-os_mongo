@@ -1,0 +1,39 @@
+---
+
+is_metal: false
+
+cache_timeout: 600
+
+mongodb_developer_mode: false
+mongodb_bind_address: 0.0.0.0
+mongodb_services:
+  mongodb-config-server:
+    group: mongodb_config_server
+    service_name: mongodb-config-server
+
+  mongodb-repl-server:
+    group: mongodb_repl_server
+    service_name: mongodb-repl-server
+
+  mongodb-data-shard:
+    group: mongodb_data_shard
+    service_name: mongodb-data-shard
+mongodb_user_update_password: 'on_create'
+mongodb_apt_packages:
+  - mongodb-org
+  - python-pip
+mongodb_pip_packages:
+  - pymongo
+mongodb_apt_remove_packages: 'mongodb'
+mongodb_system_user_home: '/var/lib/mongodb'
+mongodb_system_user_name: 'mongodb'
+mongodb_system_group_name: 'mongodb'
+mongodb_system_comment: 'MongoDB'
+mongodb_system_shell: '/bin/false'
+mongodb_datadir_prefix: '/data/db'
+mongodb_user_admin_name: 'admin'
+mongodb_user_admin_password: 'admin'
+mongodb_port: "27017"
+mongos_chunk_size: 64
+mongodb_repl_set_name: 'openstack'
+mongoc_config_set_name: 'configSrv'

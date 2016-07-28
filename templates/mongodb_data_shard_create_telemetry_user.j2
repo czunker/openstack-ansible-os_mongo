@@ -1,0 +1,1 @@
+db.createUser({ user: "{{ ceilometer_database_user }}", pwd: "{{ ceilometer_container_db_password }}", roles: [{ role: "readWrite", db: "{{ ceilometer_database_name }}"}]})

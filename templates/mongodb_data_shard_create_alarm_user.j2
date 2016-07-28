@@ -1,0 +1,1 @@
+db.createUser({ user: "{{ aodh_database_user }}", pwd: "{{ aodh_container_db_password }}", roles: [{ role: "readWrite", db: "{{ aodh_database_name }}"}]})

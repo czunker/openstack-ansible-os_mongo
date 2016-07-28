@@ -1,0 +1,65 @@
+---
+
+- name: Check replication status
+  shell: >
+    mongo --port {{ mongodb_port }} --quiet --eval 'rs.status()' \
+       | grep -qi '"code" : 94'
+  register: os_mongodb_config_server_check_replication
+  changed_when: false
+  ignore_errors: true
+
+- name: Create the file to initialize the mongo config server replica set
+  template:
+    src: mongodb_config_server_repset_init.j2
+    dest: /tmp/repset_init.js
+  tags: os-mongodb-config-server-create-replica
+
+- name: Create the file to initialize the telemetry user
+  template:
+    src: mongodb_data_shard_create_telemetry_user.j2
+    dest: /tmp/create_telemetry_user.js
+  tags: os-mongodb-data-shard-create-telemetry-user
+
+- name: Create the file to initialize the alarm user
+  template:
+    src: mongodb_data_shard_create_alarm_user.j2
+    dest: /tmp/create_alarm_user.js
+  tags: os-mongodb-data-shard-create-alarm-user
+
+- name: Initialize the replication set
+  command: >
+     mongo --port "{{ mongodb_port }}" /tmp/repset_init.js
+  tags: os-mongodb-config-server-create-replica
+  when: os_mongodb_config_server_check_replication.rc != 1
+
+- name: Check if telemetry user exists
+  shell: >
+     mongo --port {{ mongodb_port }} -u {{ ceilometer_database_user }} \
+     -p {{ ceilometer_container_db_password }} \
+     --quiet --eval 'db.version()' {{ ceilometer_database_name }}
+  register: os_mongodb_config_server_check_telemetry_user
+  ignore_errors: true
+
+- name: Create telemetry user
+  shell: >
+     mongo --port "{{ mongodb_port }}" \
+     --eval 'db = db.getSiblingDB("{{ ceilometer_database_name }}")'  \
+     /tmp/create_telemetry_user.js
+  when: os_mongodb_config_server_check_telemetry_user.rc != 0
+  tags: os-mongodb-config-server-create-telemetry-user
+
+- name: Check if alarm user exists
+  shell: >
+     mongo --port {{ mongodb_port }} -u {{ aodh_database_user }} \
+     -p {{ aodh_container_db_password }} \
+     --quiet --eval 'db.version()' {{ aodh_database_name }}
+  register: os_mongodb_config_server_check_alarm_user
+  ignore_errors: true
+
+- name: Create alarm user
+  shell: >
+     mongo --port "{{ mongodb_port }}" \
+     --eval 'db = db.getSiblingDB("{{ aodh_database_name }}")' \
+     /tmp/create_alarm_user.js
+  when: os_mongodb_config_server_check_alarm_user.rc != 0
+  tags: os-mongodb-config-server-create-alarm-user

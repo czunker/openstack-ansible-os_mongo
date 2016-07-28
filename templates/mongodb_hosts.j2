@@ -1,0 +1,23 @@
+# {{ ansible_managed }}
+127.0.0.1   localhost
+{% for host in groups[mongodb_services['mongodb-config-server']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ host }}
+{% endfor %}
+# The following is a Hack, mongo sometimes expects the node name to have "-"
+{% for host in groups[mongodb_services['mongodb-config-server']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ hostvars[host]['ansible_nodename'] }}
+{% endfor %}
+{% for host in groups[mongodb_services['mongodb-repl-server']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ host }}
+{% endfor %}
+# The following is a Hack, mongo sometimes expects the node name to have "-"
+{% for host in groups[mongodb_services['mongodb-repl-server']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ hostvars[host]['ansible_nodename'] }}
+{% endfor %}
+{% for host in groups[mongodb_services['mongodb-data-shard']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ host }}
+{% endfor %}
+# The following is a Hack, mongo sometimes expects the node name to have "-"
+{% for host in groups[mongodb_services['mongodb-data-shard']['group']] %}
+{{ hostvars[host]['ansible_eth2']['ipv4']['address'] }} {{ hostvars[host]['ansible_nodename'] }}
+{% endfor %}

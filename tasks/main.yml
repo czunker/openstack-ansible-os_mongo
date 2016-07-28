@@ -1,0 +1,54 @@
+---
+
+- name: Gather variables for each operating system
+  include_vars: "{{ item }}"
+  with_first_found:
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_release | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}-{{ ansible_distribution_major_version | lower }}.yml"
+    - "{{ ansible_distribution | lower }}.yml"
+    - "{{ ansible_os_family | lower }}.yml"
+  tags:
+    - always
+
+- include: mongodb_pre_install.yml
+  tags: os-mongodb
+
+- include: mongodb_config_server.yml
+  when: (
+    inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][0]
+    or inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][1]
+    or inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][2]
+    or inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][3] )
+  tags: os-mongodb
+
+- include: mongodb_config_server_init.yml
+  when: >
+    inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][0]
+  tags: os-mongodb
+
+- include: mongodb_repl_server.yml
+  when: (
+    inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][0]
+    or inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][1]
+    or inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][2]
+    or inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][3] )
+  tags: os-mongodb
+
+- include: mongodb_repl_server_init.yml
+  when: >
+    inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][0]
+  tags: os-mongodb
+
+- include: mongodb_data_shard.yml
+  when: (
+    inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][0]
+    or inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][1]
+    or inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][2]
+    or inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][3] )
+  tags: os-mongodb
+
+- include: mongodb_data_shard_init.yml
+  when: >
+    inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][0]
+  tags: os-mongodb

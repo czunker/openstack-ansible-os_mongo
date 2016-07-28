@@ -1,0 +1,60 @@
+---
+
+- name: create data directory for mongodb_repl_server
+  file:
+    path: "{{ mongodb_datadir_prefix }}/mongo-repl"
+    state: directory
+    owner: "{{ mongodb_system_user_name }}"
+    group: "{{ mongodb_system_group_name }}"
+  tags: os-mongodb-repl-create-dir
+
+- name: Templatize /etc/hosts
+  template:
+    src: mongodb_hosts.j2
+    dest: /etc/hosts
+    mode: 0644
+  register: os_mongodb_repl_hosts
+
+- name: Templatize /etc/default/mongod
+  template:
+    src: mongodb_default.j2
+    dest: /etc/default/mongod
+    mode: 0644
+  register: os_mongodb_repl_defaults
+
+- name: Templatize upstart job /etc/init/mongod.conf
+  template:
+    src: mongodb_repl_server_upstart.j2
+    dest: /etc/init/mongod.conf
+    mode: 0655
+  register: os_mongodb_repl_upstart
+
+- name: Create the mongo replication server file
+  template:
+    src: mongodb_repl_server.conf.j2
+    dest: /etc/mongod.conf
+  register: mongodb_repl_server_conf
+
+- name: Copy the keyfile for authentication
+  copy:
+    src: mongodb_repl_server_secret
+    dest: "{{ mongodb_datadir_prefix }}/secret"
+    owner: "{{ mongodb_system_user_name }}"
+    group: "{{ mongodb_system_group_name }}"
+    mode: 0400
+  register: mongodb_repl_server_secret
+
+- name: Restart MongoDB services on file changes
+  command: /usr/sbin/service mongod restart
+  when: (
+    os_mongodb_repl_defaults.changed
+    or os_mongodb_repl_upstart.changed
+    or mongodb_repl_server_conf.changed )
+
+- name: Pause for a while
+  pause: seconds=20
+
+- name: auto-start mongod
+  service:
+    name: mongod
+    enabled: yes
