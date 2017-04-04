@@ -28,14 +28,21 @@
     mode: 0655
   register: os_mongodb_config_server_upstart
 
+- name: Fix systemd conf file for mongod
+  copy:
+    src: systemd_mongod.conf
+    dest: /lib/systemd/system/mongod.service
+    mode: 0644
+  notify:
+    - reload systemd
+    - restart mongod
+  when: ansible_distribution_version == "16.04"
+
 - name: Create the mongo configuration server file
   template:
     src: mongodb_config_server.conf.j2
     dest: /etc/mongod.conf
   register: mongodb_config_server_conf
-
-- name: pause
-  pause: seconds=20
 
 - name: Copy the keyfile for authentication
   copy:
@@ -51,6 +58,9 @@
     os_mongodb_config_server_defaults.changed
     or os_mongodb_config_server_upstart.changed
     or mongodb_config_server_conf.changed )
+
+- name: Execute handlers
+  meta: flush_handlers
 
 - name: auto-start mongod
   service:

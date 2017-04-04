@@ -37,3 +37,4 @@ mongodb_port: "27017"
 mongos_chunk_size: 64
 mongodb_repl_set_name: 'openstack'
 mongoc_config_set_name: 'configSrv'
+mongodb_manage_service: True

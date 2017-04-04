@@ -29,6 +29,16 @@
     mode: 0655
   register: os_mongodb_repl_upstart
 
+- name: Fix systemd conf file for mongod
+  copy:
+    src: systemd_mongod.conf
+    dest: /lib/systemd/system/mongod.service
+    mode: 0644
+  notify:
+    - reload systemd
+    - restart mongod
+  when: ansible_distribution_version == "16.04"
+
 - name: Create the mongo replication server file
   template:
     src: mongodb_repl_server.conf.j2
@@ -51,8 +61,8 @@
     or os_mongodb_repl_upstart.changed
     or mongodb_repl_server_conf.changed )
 
-- name: Pause for a while
-  pause: seconds=20
+- name: Execute handlers
+  meta: flush_handlers
 
 - name: auto-start mongod
   service:
