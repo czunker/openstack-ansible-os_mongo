@@ -33,7 +33,7 @@
   tags: os-mongodb
 
 - include: mongodb_data_shard.yml
-  when: inventory_hostname in groups.mongodb_data_shard[0]
+  when: inventory_hostname in groups.mongodb_data_shard
   tags: os-mongodb
 
 - include: mongodb_data_shard_init.yml
