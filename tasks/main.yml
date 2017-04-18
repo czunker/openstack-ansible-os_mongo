@@ -15,40 +15,28 @@
   tags: os-mongodb
 
 - include: mongodb_config_server.yml
-  when: (
-    inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][0]
-    or inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][1]
-    or inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][2]
-    or inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][3] )
+  when: inventory_hostname in groups.mongodb_config_server
   tags: os-mongodb
 
 - include: mongodb_config_server_init.yml
   when: >
-    inventory_hostname == groups[mongodb_services['mongodb-config-server']['group']][0]
+    inventory_hostname == groups.mongodb_config_server[0]
   tags: os-mongodb
 
 - include: mongodb_repl_server.yml
-  when: (
-    inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][0]
-    or inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][1]
-    or inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][2]
-    or inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][3] )
+  when: inventory_hostname in groups.mongodb_repl_server
   tags: os-mongodb
 
 - include: mongodb_repl_server_init.yml
   when: >
-    inventory_hostname == groups[mongodb_services['mongodb-repl-server']['group']][0]
+    inventory_hostname == groups.mongodb_repl_server[0]
   tags: os-mongodb
 
 - include: mongodb_data_shard.yml
-  when: (
-    inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][0]
-    or inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][1]
-    or inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][2]
-    or inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][3] )
+  when: inventory_hostname in groups.mongodb_data_shard[0]
   tags: os-mongodb
 
 - include: mongodb_data_shard_init.yml
   when: >
-    inventory_hostname == groups[mongodb_services['mongodb-data-shard']['group']][0]
+    inventory_hostname == groups.mongodb_data_shard[0]
   tags: os-mongodb
