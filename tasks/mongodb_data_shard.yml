@@ -83,7 +83,7 @@
 
 - name: Restart MongoDB services on file changes
   service:
-    name: mongos
+    name: mongod
     state: restarted
   when: (
     os_mongodb_data_shard_defaults.changed
