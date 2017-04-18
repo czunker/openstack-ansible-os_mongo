@@ -82,7 +82,9 @@
   meta: flush_handlers
 
 - name: Restart MongoDB services on file changes
-  command: /usr/sbin/service mongos restart
+  service:
+    name: mongos
+    state: restarted
   when: (
     os_mongodb_data_shard_defaults.changed
     or os_mongodb_data_shard_upstart.changed

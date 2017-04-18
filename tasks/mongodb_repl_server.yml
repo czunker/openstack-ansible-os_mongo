@@ -55,7 +55,9 @@
   register: mongodb_repl_server_secret
 
 - name: Restart MongoDB services on file changes
-  command: /usr/sbin/service mongod restart
+  service:
+    name: mongod
+    state: restarted
   when: (
     os_mongodb_repl_defaults.changed
     or os_mongodb_repl_upstart.changed

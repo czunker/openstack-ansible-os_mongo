@@ -53,7 +53,9 @@
     mode: 0400
 
 - name: Restart MongoDB services on file changes
-  command: /usr/sbin/service mongod restart
+  service:
+    name: mongod
+    state: restarted
   when: (
     os_mongodb_config_server_defaults.changed
     or os_mongodb_config_server_upstart.changed
