@@ -6,6 +6,7 @@
     | grep -qi {{ mongodb_repl_set_name }}
   register: os_mongodb_data_shard_check_sharding
   changed_when: false
+  always_run: true
   ignore_errors: true
 
 - name: Create the file to initialize the mongo data shard set
@@ -38,6 +39,7 @@
      -p {{ ceilometer_container_db_password }} \
      --quiet --eval 'db.version()' {{ ceilometer_database_name }}
   register: os_mongodb_data_shard_check_telemetry_user
+  always_run: true
   ignore_errors: true
 
 - name: Create telemetry user
@@ -54,6 +56,7 @@
      -p {{ aodh_container_db_password }} \
      --quiet --eval 'db.version()' {{ aodh_database_name }}
   register: os_mongodb_data_shard_check_alarm_user
+  always_run: true
   ignore_errors: true
 
 - name: Create alarm user

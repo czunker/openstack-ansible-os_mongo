@@ -6,6 +6,7 @@
        | grep -qi '"code" : 94'
   register: os_mongodb_config_server_check_replication
   changed_when: false
+  always_run: true
   ignore_errors: true
 
 - name: Create the file to initialize the mongo config server replica set
@@ -38,6 +39,7 @@
      -p {{ ceilometer_container_db_password }} \
      --quiet --eval 'db.version()' {{ ceilometer_database_name }}
   register: os_mongodb_config_server_check_telemetry_user
+  always_run: true
   ignore_errors: true
 
 - name: Create telemetry user
@@ -54,6 +56,7 @@
      -p {{ aodh_container_db_password }} \
      --quiet --eval 'db.version()' {{ aodh_database_name }}
   register: os_mongodb_config_server_check_alarm_user
+  always_run: true
   ignore_errors: true
 
 - name: Create alarm user
